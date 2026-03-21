@@ -455,7 +455,11 @@ def clean_answer_text(answer: str) -> str:
     # 2. 删除中文句号前的引用数字 (如 "设备 4。" → "设备。")
     cleaned = re.sub(r'(?<=[^\d\s])\s*(\d+)。', '。', cleaned)
 
-    # 3. 优化列表格式
+    # 3. 优化列表格式 - 为 1. 2. 3. 这种编号添加换行分段
+    # 匹配：数字 + 英文句点 + 中文（不在行首的情况）
+    cleaned = re.sub(r'([^\n])\s*(\d+\.\s+[\u4e00-\u9fff])', r'\1\n\n\2', cleaned)
+
+    # 4. 优化列表格式 - 去除每行前后空格
     lines = cleaned.split('\n')
     formatted_lines = []
     for line in lines:
@@ -465,13 +469,13 @@ def clean_answer_text(answer: str) -> str:
 
     cleaned = '\n'.join(formatted_lines)
 
-    # 4. 修复常见格式问题
+    # 5. 修复常见格式问题
     # 中文文字间不应有空格
     cleaned = re.sub(r'([\u4e00-\u9fff])\s+([\u4e00-\u9fff])', r'\1\2', cleaned)
     # 连续空行压缩
     cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
 
-    # 5. 优化分段
+    # 6. 优化分段
     cleaned = cleaned.replace('-' * 80, '\n\n---\n\n')
 
     return cleaned
