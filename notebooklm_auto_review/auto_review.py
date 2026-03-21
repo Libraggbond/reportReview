@@ -253,6 +253,7 @@ async def review_section(
 async def main():
     """主函数"""
     import argparse
+    import subprocess
 
     parser = argparse.ArgumentParser(description="NotebookLM 自动审核工具（分段版本）")
     parser.add_argument(
@@ -276,6 +277,16 @@ async def main():
         default=None,
         help="只审核指定段落（ID），不填则审核全部"
     )
+    parser.add_argument(
+        "--report", "-r",
+        default=None,
+        help="原始报告文件路径（如指定，会先运行 split_report.py 拆分）"
+    )
+    parser.add_argument(
+        "--skip-split",
+        action="store_true",
+        help="跳过自动拆分步骤"
+    )
 
     args = parser.parse_args()
 
@@ -293,6 +304,43 @@ async def main():
     logger.info("=" * 60)
     logger.info("NotebookLM 自动审核工具（分段版本）")
     logger.info("=" * 60)
+
+    # 如果需要先拆分报告
+    if args.report and not args.skip_split:
+        logger.info(f"正在拆分报告：{args.report}")
+        script_dir = Path(__file__).parent.parent
+        split_script = script_dir / "split_report.py"
+
+        if split_script.exists():
+            try:
+                # 使用自动检测章节配置，非交互模式
+                result = subprocess.run(
+                    ["python3", str(split_script), args.report, args.input, "--auto"],
+                    capture_output=True,
+                    text=True,
+                    timeout=300
+                )
+                logger.info("报告拆分完成")
+                if result.stdout:
+                    logger.info(f"split_report 输出：{result.stdout}")
+                if result.stderr:
+                    logger.warning(f"split_report 错误：{result.stderr}")
+            except subprocess.TimeoutExpired:
+                logger.error("报告拆分超时")
+            except Exception as e:
+                logger.error(f"报告拆分失败：{e}")
+        else:
+            logger.warning(f"找不到 split_report.py: {split_script}")
+
+    # 检查输入目录
+    input_path = Path(args.input)
+    if not input_path.exists():
+        logger.error(f"输入目录不存在：{input_path}")
+        return
+
+    # 统计输入文件
+    doc_files = list(input_path.glob("*.docx")) + list(input_path.glob("*.pdf"))
+    logger.info(f"输入目录中找到 {len(doc_files)} 个文档")
 
     # 加载审核清单
     checklist_path = Path(args.checklist)

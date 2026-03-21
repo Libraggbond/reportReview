@@ -482,15 +482,17 @@ def main():
     default_output = './chapters'
 
     # 解析命令行参数
-    if len(sys.argv) >= 2:
-        input_file = sys.argv[1]
-    else:
-        input_file = default_input
+    import argparse
+    parser = argparse.ArgumentParser(description="等级测评报告拆分脚本")
+    parser.add_argument("input_file", nargs="?", default=None, help="输入的 docx 文件路径")
+    parser.add_argument("output_dir", nargs="?", default=None, help="输出目录")
+    parser.add_argument("--auto", action="store_true", help="使用自动检测的章节配置，不询问")
+    parser.add_argument("--use-chapters", action="store_true", help="使用脚本中硬编码的 CHAPTERS 配置")
 
-    if len(sys.argv) >= 3:
-        output_dir = sys.argv[2]
-    else:
-        output_dir = default_output
+    args = parser.parse_args()
+
+    input_file = args.input_file if args.input_file else default_input
+    output_dir = args.output_dir if args.output_dir else default_output
 
     # 检查输入文件
     if not os.path.exists(input_file):
@@ -505,28 +507,38 @@ def main():
     doc, auto_chapters = analyze_document(input_file)
     print("\n")
 
-    # 询问是否使用自动检测的章节配置
-    print("是否使用自动检测的章节配置进行拆分？")
-    print("  Y - 使用自动检测的配置")
-    print("  N - 使用脚本中硬编码的 CHAPTERS 配置")
-    print("  Q - 退出不执行")
-    print()
-
-    choice = input("请选择 [Y/N/Q]: ").strip().upper()
-
-    if choice == 'Q':
-        print("已取消操作")
-        sys.exit(0)
-    elif choice == 'N':
-        if CHAPTERS is None:
-            print("警告：脚本中没有配置 CHAPTERS，将使用自动检测的配置")
-            chapters_config = auto_chapters
-        else:
+    # 根据参数决定使用哪个配置
+    if args.auto or args.use_chapters:
+        # 非交互模式
+        if args.use_chapters and CHAPTERS is not None:
             print("使用脚本中硬编码的 CHAPTERS 配置")
             chapters_config = CHAPTERS
+        else:
+            print("使用自动检测的章节配置")
+            chapters_config = auto_chapters
     else:
-        print("使用自动检测的章节配置")
-        chapters_config = auto_chapters
+        # 交互模式
+        print("是否使用自动检测的章节配置进行拆分？")
+        print("  Y - 使用自动检测的配置")
+        print("  N - 使用脚本中硬编码的 CHAPTERS 配置")
+        print("  Q - 退出不执行")
+        print()
+
+        choice = input("请选择 [Y/N/Q]: ").strip().upper()
+
+        if choice == 'Q':
+            print("已取消操作")
+            sys.exit(0)
+        elif choice == 'N':
+            if CHAPTERS is None:
+                print("警告：脚本中没有配置 CHAPTERS，将使用自动检测的配置")
+                chapters_config = auto_chapters
+            else:
+                print("使用脚本中硬编码的 CHAPTERS 配置")
+                chapters_config = CHAPTERS
+        else:
+            print("使用自动检测的章节配置")
+            chapters_config = auto_chapters
 
     print("\n")
 
