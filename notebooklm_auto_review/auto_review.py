@@ -434,6 +434,49 @@ async def main():
         await client.close()
 
 
+def clean_answer_text(answer: str) -> str:
+    """
+    清理回答文本：去除引用数字、优化格式
+
+    Args:
+        answer: 原始回答文本
+
+    Returns:
+        清理后的文本
+    """
+    import re
+
+    cleaned = answer
+
+    # 1. 去除 more_horiz/more_vert 标记及其前面的数字
+    cleaned = re.sub(r'\d*more_horiz', '', cleaned)
+    cleaned = re.sub(r'\d*more_vert', '', cleaned)
+
+    # 2. 删除中文句号前的引用数字 (如 "设备 4。" → "设备。")
+    cleaned = re.sub(r'(?<=[^\d\s])\s*(\d+)。', '。', cleaned)
+
+    # 3. 优化列表格式
+    lines = cleaned.split('\n')
+    formatted_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped:
+            formatted_lines.append(stripped)
+
+    cleaned = '\n'.join(formatted_lines)
+
+    # 4. 修复常见格式问题
+    # 中文文字间不应有空格
+    cleaned = re.sub(r'([\u4e00-\u9fff])\s+([\u4e00-\u9fff])', r'\1\2', cleaned)
+    # 连续空行压缩
+    cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+
+    # 5. 优化分段
+    cleaned = cleaned.replace('-' * 80, '\n\n---\n\n')
+
+    return cleaned
+
+
 def generate_summary_report(results: List[Dict], output_dir: str) -> None:
     """生成汇总报告"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -471,19 +514,26 @@ def generate_summary_report(results: List[Dict], output_dir: str) -> None:
 
         for q in result.get("questions", []):
             q_id = q.get('question_id', '')
-            report_lines.append(f"**问题 {q_id}:**")
+            report_lines.append(f"#### 问题 {q_id}")
             report_lines.append("")
             report_lines.append(f"{q['question']}")
             report_lines.append("")
-            report_lines.append(f"*参考文档:* {', '.join(q['reference_docs']) if q['reference_docs'] else '全部文档'}")
+            report_lines.append(f"**参考文档:** {', '.join(q['reference_docs']) if q['reference_docs'] else '全部文档'}")
+            report_lines.append("")
+            report_lines.append("**回答:**")
             report_lines.append("")
 
             answer = q.get('answer', '')
-            if len(answer) > 1500:
-                report_lines.append(f"**回答:** {answer[:1500]}...")
-                report_lines.append(f"*(完整回答见 JSON 结果文件)*")
+            # 清理回答文本
+            cleaned_answer = clean_answer_text(answer)
+
+            if len(cleaned_answer) > 2000:
+                # 长回答分段显示
+                report_lines.append(f"{cleaned_answer[:2000]}")
+                report_lines.append("")
+                report_lines.append("*（完整回答见 JSON 结果文件）*")
             else:
-                report_lines.append(f"**回答:** {answer}")
+                report_lines.append(f"{cleaned_answer}")
 
             report_lines.append("")
             report_lines.append("---")
