@@ -1,0 +1,31 @@
+# NotebookLM 自动审核配置
+
+# Google 账号（也可使用环境变量 GOOGLE_ACCOUNT）
+# google_account: your-email@gmail.com
+
+# 输出目录
+output_dir: ./results
+
+# 超时设置（秒）
+upload_timeout: 300        # 文档上传超时
+processing_timeout: 600    # AI 处理超时
+page_timeout: 60000        # 页面加载超时（毫秒）
+
+# 请求间隔（毫秒）- 避免触发反自动化
+request_interval: 3000
+
+# 重试配置
+max_retries: 3
+retry_delay: 5
+
+# 浏览器配置
+headless: false            # 生产环境可设为 true
+slow_mo: 1000              # 操作间隔（毫秒），模拟真人操作
+
+# 代理配置
+proxy: "http://127.0.0.1:7890"
+
+# NotebookLM 配置
+notebook_name: "等级测评报告审核"  # 创建的 Notebook 名称
+notebook_url: "https://notebooklm.google.com/notebook/8707e98c-4ab9-452b-a719-b22ffb423452"  # Notebook URL
+max_documents: 50          # 单个 Notebook 最大文档数

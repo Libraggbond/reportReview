@@ -1,0 +1,51 @@
+name: NotebookLM Auto Review
+
+on:
+  push:
+    paths:
+      - 'notebooklm_auto_review/**'
+  workflow_dispatch:
+    inputs:
+      input_dir:
+        description: '输入目录'
+        required: false
+        default: './chapters'
+      checklist:
+        description: '审核清单'
+        required: false
+        default: './checklist.md'
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r notebooklm_auto_review/requirements.txt
+        python -m playwright install chromium
+
+    - name: Run auto review
+      env:
+        GOOGLE_ACCOUNT: ${{ secrets.GOOGLE_ACCOUNT }}
+      run: |
+        cd notebooklm_auto_review
+        python auto_review.py \
+          --input "${{ github.event.inputs.input_dir || './chapters' }}" \
+          --checklist "${{ github.event.inputs.checklist || './checklist.md' }}" \
+          --output "./results"
+
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: review-results
+        path: notebooklm_auto_review/results/
+        retention-days: 30
