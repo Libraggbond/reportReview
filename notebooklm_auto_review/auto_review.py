@@ -364,6 +364,13 @@ async def main():
                 if notebook_id:
                     await client.open_notebook(notebook_id)
 
+        # 打开 Notebook 后，先删除所有原有的文档源
+        logger.info("\n" + "=" * 60)
+        logger.info("清理原有文档源...")
+        logger.info("=" * 60)
+        await client.remove_all_sources()
+        await asyncio.sleep(3)
+
         # 确定要审核的段落
         sections_to_review = checklist.sections
         if args.section is not None:
