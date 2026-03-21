@@ -1,12 +1,12 @@
-# 等级测评报告自动审核工具
+# 报告自动审核工具
 
-网络安全等级保护测评报告的自动化审核工具集，基于 Google NotebookLM 实现智能文档审核。
+报告的自动化审核工具集，基于 Google NotebookLM 实现智能文档审核。
 
 ## 项目简介
 
 本项目提供了一套完整的等级测评报告自动化审核解决方案：
 
-1. **报告拆分工具** (`split_report.py`) - 将完整的等级测评报告按章节自动拆分
+1. **报告拆分工具** (`split_report.py`) - 将完整的报告按章节自动拆分
 2. **自动审核工具** (`notebooklm_auto_review/`) - 基于 Google NotebookLM 进行智能化审核
 3. **审核清单** (`checklist.md`) - 预置 11 个大类、16 个问题的专业审核 checklist
 
@@ -57,7 +57,7 @@ python auto_review.py -i ./chapters -c ../checklist.md -s 1
 # google_account: your-email@gmail.com
 
 # Notebook 配置
-notebook_name: "等级测评报告审核"
+notebook_name: "审核"
 # notebook_url: "https://notebooklm.google.com/notebook/xxx"
 
 # 代理配置
@@ -73,7 +73,7 @@ request_interval: 3000
 reportReview/
 ├── README.md                    # 本说明文档
 ├── checklist.md                 # 审核清单
-├── 高风险判定指引.md             # 高风险判定参考
+├── 指引.md                       # 高风险判定参考
 ├── split_report.py              # 报告拆分脚本
 ├── notebooklm_auto_review/      # 自动审核工具
 │   ├── README.md                # 详细说明
@@ -87,21 +87,6 @@ reportReview/
 └── results/                     # 审核结果（本地生成）
 ```
 
-## 审核内容
-
-| 段落 | 审核内容 | 问题数 |
-|------|----------|--------|
-| 1 | 附录 D（单项测评结果记录） | 4 |
-| 2 | 整体测评 | 1 |
-| 3 | 等级测评结论 | 1 |
-| 4 | 重大风险隐患及整改建议 | 1 |
-| 5 | 涉及到的时间问题 | 1 |
-| 6 | 被测对象描述 | 1 |
-| 7 | 单项测评结果分析 | 3 |
-| 8 | 安全问题风险分析 | 1 |
-| 9 | 安全整改建议 | 1 |
-| 10 | 附录 A（被测对象资产） | 1 |
-| 11 | 错别字 | 1 |
 
 ## 注意事项
 
