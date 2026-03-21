@@ -32,3 +32,6 @@ temp_*.png
 # Backup files
 *.bak
 *~
+
+# NotebookLM authentication (sensitive)
+notebooklm_auto_review/.auth/
