@@ -12,26 +12,48 @@
 
 ## 快速开始
 
-### 1. 拆分测评报告
+### 方式一：一键自动拆分并审核（推荐）
 
 ```bash
-python split_report.py report.docx ./chapters
+cd notebooklm_auto_review
+
+# 登录 Google 账号（首次使用）
+python login_notebooklm.py
+
+# 自动拆分报告并审核
+python auto_review.py \
+    --report /path/to/report.docx \
+    --input ./chapters \
+    --checklist ../checklist.md \
+    --output ./results
 ```
 
-### 2. 安装审核工具环境
+### 方式二：分步执行
+
+#### 1. 拆分测评报告
+
+```bash
+# 交互式选择（默认）
+python split_report.py report.docx ./chapters
+
+# 非交互式，使用自动检测的章节配置
+python split_report.py report.docx ./chapters --auto
+```
+
+#### 2. 安装审核工具环境
 
 ```bash
 cd notebooklm_auto_review
 python setup.py
 ```
 
-### 3. 登录 Google 账号
+#### 3. 登录 Google 账号
 
 ```bash
 python login_notebooklm.py
 ```
 
-### 4. 运行自动审核
+#### 4. 运行自动审核
 
 ```bash
 # 审核全部章节
@@ -39,13 +61,16 @@ python auto_review.py --input ./chapters --checklist ../checklist.md
 
 # 只审核指定段落
 python auto_review.py -i ./chapters -c ../checklist.md -s 1
+
+# 跳过拆分步骤（如已提前拆分）
+python auto_review.py -i ./chapters -c ../checklist.md --skip-split
 ```
 
-### 5. 查看结果
+#### 5. 查看结果
 
 审核结果输出到 `notebooklm_auto_review/results/` 目录：
 - `review_results_*.json` - 详细 JSON 结果
-- `summary_*.md` - Markdown 汇总报告
+- `summary_*.md` - Markdown 汇总报告（优化格式）
 - `review_*.log` - 运行日志
 
 ## 配置说明
