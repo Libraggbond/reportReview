@@ -545,6 +545,42 @@ def main():
     # 拆分文档
     split_document(input_file, output_dir, chapters_config)
 
+    # 复制高风险判定指引文件到输出目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    guidance_file = os.path.join(script_dir, '高风险判定指引.md')
+    if os.path.exists(guidance_file):
+        import shutil
+        target_file = os.path.join(output_dir, '高风险判定指引.md')
+        shutil.copy2(guidance_file, target_file)
+        print(f"已复制高风险判定指引.md 到 {output_dir}")
+    else:
+        print(f"警告：找不到高风险判定指引.md - {guidance_file}")
+
+    # 自动调用脱敏脚本
+    print("\n正在对拆分后的文件进行脱敏处理...")
+    # desensitize.py 在 notebooklm_auto_review 目录中
+    desensitize_script = os.path.join(script_dir, 'notebooklm_auto_review', 'desensitize.py')
+
+    if os.path.exists(desensitize_script):
+        import subprocess
+        try:
+            result = subprocess.run(
+                ['python3', desensitize_script, output_dir],
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            print(result.stdout)
+            if result.stderr:
+                print(f"警告：{result.stderr}")
+            print("脱敏处理完成！")
+        except subprocess.TimeoutExpired:
+            print("错误：脱敏处理超时")
+        except Exception as e:
+            print(f"错误：脱敏处理失败 - {e}")
+    else:
+        print(f"警告：找不到脱敏脚本 - {desensitize_script}")
+
 
 if __name__ == '__main__':
     main()

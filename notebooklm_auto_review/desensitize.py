@@ -16,6 +16,32 @@ import os
 import re
 import argparse
 from docx import Document
+import yaml
+
+
+def load_sensitive_words(config_path):
+    """从 config.yaml 加载自定义敏感词"""
+    # 默认路径：当前脚本所在目录的 config.yaml
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_path = os.path.join(script_dir, 'config.yaml')
+
+    if config_path is None:
+        config_path = default_path
+
+    if not os.path.exists(config_path):
+        print(f"警告：配置文件不存在 - {config_path}")
+        return []
+
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+
+        sensitive_words = config.get('sensitive_words', [])
+        print(f"已加载 {len(sensitive_words)} 个自定义敏感词：{sensitive_words}")
+        return sensitive_words
+    except Exception as e:
+        print(f"警告：读取配置文件失败 - {e}")
+        return []
 
 
 def remove_images_from_docx(doc_path):
@@ -177,19 +203,23 @@ def replace_in_paragraph(paragraph, text_replacements, regex_replacements):
     return total_count
 
 
-def desensitize_documents(input_dir, recursive=True):
+def desensitize_documents(input_dir, recursive=True, config_path=None):
     """
     对指定目录下的所有 docx 文档进行脱敏处理
 
     Args:
         input_dir: 输入目录
         recursive: 是否递归处理子目录
+        config_path: config.yaml 路径（可选）
     """
     input_dir = os.path.abspath(input_dir)
 
     if not os.path.exists(input_dir):
         print(f"错误：目录不存在 - {input_dir}")
         return
+
+    # 加载自定义敏感词
+    sensitive_words = load_sensitive_words(config_path)
 
     # 定义文本替换规则（按长度降序排列，长文本优先替换）
     basic_replacements = {
@@ -199,8 +229,8 @@ def desensitize_documents(input_dir, recursive=True):
         '济南市高新区汉峪金谷 A3-4-16': '塞伯坦',
         '济南市高新区汉峪金谷 A3-4-16': '塞伯坦',
         '青岛': '乌城',
-        '山东': '乌城',
-        '中国': '乌城',
+        '山东': '鹿省',
+        '中国': '华国',
         'SC202127130010134': '000000',
         '250102': '0000',
         '刘俊': '谪仙人',
@@ -210,6 +240,10 @@ def desensitize_documents(input_dir, recursive=True):
         'liujun@sdsecurity.org.cn': 'aaa',
         '0134': '9999',
     }
+
+    # 添加自定义敏感词替换
+    for word in sensitive_words:
+        basic_replacements[word] = '天外天'
 
     # 定义正则替换规则
     regex_replacements = {
@@ -268,6 +302,7 @@ def main():
 示例:
   python desensitize.py /path/to/docs          # 处理指定目录下的所有 docx 文件
   python desensitize.py /path/to/docs --no-recursive  # 仅处理目录，不递归子目录
+  python desensitize.py /path/to/docs --config /path/to/config.yaml  # 指定配置文件
         """
     )
     parser.add_argument(
@@ -279,12 +314,19 @@ def main():
         action='store_true',
         help='不递归处理子目录'
     )
+    parser.add_argument(
+        '--config',
+        type=str,
+        default=None,
+        help='config.yaml 配置文件路径（可选）'
+    )
 
     args = parser.parse_args()
 
     desensitize_documents(
         args.input_dir,
-        recursive=not args.no_recursive
+        recursive=not args.no_recursive,
+        config_path=args.config
     )
 
 

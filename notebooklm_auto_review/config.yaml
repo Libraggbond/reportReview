@@ -26,6 +26,11 @@ slow_mo: 1000              # 操作间隔（毫秒），模拟真人操作
 proxy: "http://127.0.0.1:7890"
 
 # NotebookLM 配置
-notebook_name: "等级测评报告审核"  # 创建的 Notebook 名称
-notebook_url: "https://notebooklm.google.com/notebook/8707e98c-4ab9-452b-a719-b22ffb423452"  # Notebook URL
+notebook_name: "报告审核"  # 创建的 Notebook 名称
+notebook_url: "https://notebooklm.google.com/notebook/e75ecce5-7f33-46d0-ba51-b31470f631eb"  # Notebook URL
 max_documents: 50          # 单个 Notebook 最大文档数
+
+# 脱敏配置 - 自定义敏感词列表
+sensitive_words:
+  - 北京
+  - 海洋科技
