@@ -162,10 +162,6 @@ reportReview/
 │       │   └── SKILL.md
 │       └── report-reviewer-standalone/  # 单 Agent 审核 Skill
 │           └── SKILL.md
-└── notebooklm_auto_review/      # (旧版) NotebookLM 自动审核工具
-    ├── auto_review.py
-    ├── notebooklm_client.py
-    └── ...
 ```
 
 ## 两种 Skill 对比

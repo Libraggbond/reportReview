@@ -33,5 +33,5 @@ temp_*.png
 *.bak
 *~
 
-# NotebookLM authentication (sensitive)
-notebooklm_auto_review/.auth/
+# NotebookLM (deprecated, excluded from git)
+notebooklm_auto_review/
