@@ -557,6 +557,15 @@ def main():
     else:
         print(f"警告：找不到高风险判定指引.md - {guidance_file}")
 
+    # 复制 beian.png 到输出目录
+    beian_file = os.path.join(script_dir, 'beian.png')
+    if os.path.exists(beian_file):
+        target_png = os.path.join(output_dir, 'beian.png')
+        shutil.copy2(beian_file, target_png)
+        print(f"已复制 beian.png 到 {output_dir}")
+    else:
+        print(f"警告：找不到 beian.png - {beian_file}")
+
     # 自动调用脱敏脚本（如果未指定跳过）
     if not args.skip_desensitize:
         print("\n正在对拆分后的文件进行脱敏处理...")
